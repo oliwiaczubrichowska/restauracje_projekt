@@ -11,6 +11,11 @@ try:
 except ImportError:
     tkintermapview = None
 
+try:
+    import geocoder
+except ImportError:
+    geocoder = None
+
 
 class LoginWindow(tk.Tk):
     def __init__(self):
@@ -112,7 +117,11 @@ class MainWindow(tk.Tk):
             self.tab_klienci,
             "klienci",
             wymaga_lokalu=True,
-            dodatkowe_pola=[("telefon", "Telefon:"), ("stolik", "Numer stolika:")],
+            dodatkowe_pola=[
+                ("telefon", "Telefon:"),
+                ("godzina_rezerwacji", "Godzina rezerwacji:"),
+                ("czas_rezerwacji", "Czas rezerwacji:"),
+            ],
         )
         self.buduj_crud(
             self.tab_pracownicy,
@@ -149,12 +158,10 @@ class MainWindow(tk.Tk):
 
         pola = {
             "nazwa": self.dodaj_pole(form, "Nazwa:", 0),
-            "adres": self.dodaj_pole(form, "Adres:", 1),
-            "lat": self.dodaj_pole(form, "Szerokosc geogr.:", 2),
-            "lon": self.dodaj_pole(form, "Dlugosc geogr.:", 3),
+            "adres": self.dodaj_pole(form, "Miejscowosc albo adres:", 1),
         }
 
-        row = 4
+        row = 2
         if wymaga_lokalu:
             pola["lokal_id"] = self.dodaj_pole(form, "ID lokalu:", row)
             row += 1
@@ -215,6 +222,10 @@ class MainWindow(tk.Tk):
                 opis += f" | Lokal: {model.nazwa_lokalu(obiekt['lokal_id'])}"
             if "stolik" in obiekt:
                 opis += f" | Stolik: {obiekt['stolik']}"
+            if "godzina_rezerwacji" in obiekt:
+                opis += f" | Rezerwacja: {obiekt['godzina_rezerwacji']}"
+            if "czas_rezerwacji" in obiekt:
+                opis += f" | Czas: {obiekt['czas_rezerwacji']}"
             if "stanowisko" in obiekt:
                 opis += f" | {obiekt['stanowisko']}"
             listbox.insert(tk.END, opis)
@@ -276,8 +287,7 @@ class MainWindow(tk.Tk):
             messagebox.showwarning("Brak danych", "Uzupelnij nazwe i adres.")
             raise ValueError
 
-        lat = self.pobierz_liczbe(pola["lat"], "szerokosc")
-        lon = self.pobierz_liczbe(pola["lon"], "dlugosc")
+        lat, lon = self.pobierz_wspolrzedne(adres)
 
         obiekt = {
             "nazwa": nazwa,
@@ -301,6 +311,29 @@ class MainWindow(tk.Tk):
             obiekt[klucz] = pola[klucz].get().strip()
 
         return obiekt
+
+    def pobierz_wspolrzedne(self, adres):
+        if tkintermapview is not None:
+            try:
+                wynik = tkintermapview.convert_address_to_coordinates(adres)
+                if wynik is not None:
+                    return wynik
+            except Exception:
+                pass
+
+        if geocoder is not None:
+            try:
+                wynik = geocoder.osm(adres)
+                if wynik.ok:
+                    return wynik.latlng[0], wynik.latlng[1]
+            except Exception:
+                pass
+
+        messagebox.showwarning(
+            "Nie znaleziono adresu",
+            "Nie udalo sie znalezc wspolrzednych. Wpisz dokladniejsza miejscowosc albo adres.",
+        )
+        raise ValueError
 
     def pobierz_liczbe(self, entry, nazwa_pola):
         tekst = entry.get().strip().replace(",", ".")
@@ -378,7 +411,10 @@ class MainWindow(tk.Tk):
         for klient in model.klienci_lokalu(lokal_id):
             self.lista_klientow_lokalu.insert(
                 tk.END,
-                f"{klient['nazwa']} | stolik {klient.get('stolik', '')}",
+                (
+                    f"{klient['nazwa']} | godz. {klient.get('godzina_rezerwacji', '')} "
+                    f"| czas: {klient.get('czas_rezerwacji', '')}"
+                ),
             )
 
         for pracownik in model.pracownicy_lokalu(lokal_id):
