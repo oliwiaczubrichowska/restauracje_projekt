@@ -425,8 +425,29 @@ class MainWindow(tk.Tk):
                 text=f"{etykieta}: {obiekt['nazwa']}",
                 marker_color_circle=kolor,
                 marker_color_outside="white",
+                command=lambda marker, kat=kategoria, obj_id=obiekt["id"]: self.wybierz_z_mapy(kat, obj_id),
             )
             self.markery.append(marker)
+
+    def wybierz_z_mapy(self, kategoria, obiekt_id):
+        zakladki = {
+            "lokale": self.tab_lokale,
+            "klienci": self.tab_klienci,
+            "pracownicy": self.tab_pracownicy,
+        }
+        self.notebook.select(zakladki[kategoria])
+        self.zaznacz_na_liscie(kategoria, obiekt_id)
+        self.wczytaj_zaznaczone(kategoria)
+
+    def zaznacz_na_liscie(self, kategoria, obiekt_id):
+        if obiekt_id not in self.lista_id[kategoria]:
+            return
+        indeks = self.lista_id[kategoria].index(obiekt_id)
+        listbox = self.listboxy[kategoria]
+        listbox.selection_clear(0, tk.END)
+        listbox.selection_set(indeks)
+        listbox.activate(indeks)
+        listbox.see(indeks)
 
     def ustaw_mape_na_obiekcie(self, obiekt):
         if self.map_widget is None:
