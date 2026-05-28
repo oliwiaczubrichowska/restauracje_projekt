@@ -1,10 +1,8 @@
-konta = {
-    "admin": "admin",
-}
+konta = {"admin": "admin",}
 
 
 data = {
-    "lokale": [
+"lokale": [
         {
             "id": 1,
             "nazwa": "Pizza u Janka",
@@ -25,7 +23,8 @@ data = {
             "id": 1,
             "nazwa": "Anna Nowak",
             "telefon": "500100200",
-            "stolik": "4",
+            "godzina_rezerwacji": "18:00",
+            "czas_rezerwacji": "2 godziny",
             "adres": "Warszawa, Wola",
             "lat": 52.2319,
             "lon": 20.9822,
@@ -35,7 +34,8 @@ data = {
             "id": 2,
             "nazwa": "Ola Wisniewska",
             "telefon": "501200300",
-            "stolik": "2",
+            "godzina_rezerwacji": "19:30",
+            "czas_rezerwacji": "90 minut",
             "adres": "Skierniewice",
             "lat": 51.9554,
             "lon": 20.1592,
