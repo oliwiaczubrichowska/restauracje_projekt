@@ -1,7 +1,10 @@
+import site
 import tkinter as tk
 from tkinter import messagebox, ttk
 
 import model
+
+site.addsitedir(site.getusersitepackages())
 
 try:
     import tkintermapview
