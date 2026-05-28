@@ -119,6 +119,7 @@ class MainWindow(tk.Tk):
             wymaga_lokalu=True,
             dodatkowe_pola=[
                 ("telefon", "Telefon:"),
+                ("stolik", "Numer stolika:"),
                 ("godzina_rezerwacji", "Godzina rezerwacji:"),
                 ("czas_rezerwacji", "Czas rezerwacji:"),
             ],
@@ -412,8 +413,9 @@ class MainWindow(tk.Tk):
             self.lista_klientow_lokalu.insert(
                 tk.END,
                 (
-                    f"{klient['nazwa']} | godz. {klient.get('godzina_rezerwacji', '')} "
-                    f"| czas: {klient.get('czas_rezerwacji', '')}"
+                    f"{klient['nazwa']} | stolik {klient.get('stolik', '')} "
+                    f"| godz. {klient.get('godzina_rezerwacji', '')} "
+                    f"| czas {klient.get('czas_rezerwacji', '')}"
                 ),
             )
 
